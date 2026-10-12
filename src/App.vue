@@ -5,6 +5,7 @@ import api from './services/api'
 const users = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
+const API_URL = 'https://vue-vercel-ashen-beta.vercel.app/api/api/users'
 
 async function loadUsers() {
   isLoading.value = true
