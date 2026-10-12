@@ -1,86 +1,43 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import api from './services/api'
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
-const users = ref([])
-const isLoading = ref(true)
-const errorMessage = ref('')
-const API_URL = 'https://vue-vercel-ashen-beta.vercel.app/api/api/users'
+const users = ref([]);
+const loading = ref(true);
+const error = ref(null);
 
-async function loadUsers() {
-  isLoading.value = true
-  errorMessage.value = ''
+// Ganti URL ini sesuai URL API Laravel Vercel milikmu
+const API_URL =
+  "https://api-vercel-f4fwj3ncg-salsabilablokc-2523s-projects.vercel.app/api/api/users";
 
+const fetchUsers = async () => {
   try {
-    const response = await api.get('/api/api/users')
-    users.value = response.data.data
-  } catch (error) {
-    errorMessage.value =
-      error instanceof Error ? error.message : 'Terjadi kesalahan saat mengambil data.'
+    const response = await axios.get(API_URL);
+    // Mengambil array data dari respon API Laravel
+    users.value = response.data.data;
+  } catch (err) {
+    error.value = "Gagal mengambil data dari API: " + err.message;
   } finally {
-    isLoading.value = false
+    loading.value = false;
   }
-}
+};
 
-onMounted(loadUsers)
+onMounted(() => {
+  fetchUsers();
+});
 </script>
 
 <template>
-  <main class="container">
-    <h1>Daftar Pengguna</h1>
+  <div style="padding: 20px; font-family: sans-serif">
+    <h1>Daftar Pengguna (Vue + Laravel API)</h1>
 
-    <p v-if="isLoading">Memuat data...</p>
-    <p v-else-if="errorMessage" class="error">
-      Gagal mengambil data: {{ errorMessage }}
-    </p>
-    <p v-else-if="users.length === 0">Data pengguna tidak ditemukan.</p>
+    <p v-if="loading">Sedang memuat data...</p>
+    <p v-else-if="error" style="color: red">{{ error }}</p>
 
-    <ul v-else class="user-list">
-      <li v-for="user in users" :key="user.id" class="user-card">
-        <h2>{{ user.name }}</h2>
-        <p>{{ user.email }}</p>
+    <ul v-else>
+      <li v-for="user in users" :key="user.id">
+        <strong>{{ user.name }}</strong> - {{ user.email }}
       </li>
     </ul>
-  </main>
+  </div>
 </template>
-
-<style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #f3f4f6;
-  color: #1f2937;
-  font-family: Arial, sans-serif;
-}
-
-.container {
-  width: min(800px, calc(100% - 32px));
-  margin: 40px auto;
-}
-
-.user-list {
-  display: grid;
-  gap: 16px;
-  padding: 0;
-  list-style: none;
-}
-
-.user-card {
-  padding: 16px;
-  border-radius: 8px;
-  background: white;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
-}
-
-.user-card h2 {
-  margin-top: 0;
-  text-transform: capitalize;
-}
-
-.error {
-  color: #b91c1c;
-}
-</style>
